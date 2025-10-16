@@ -1,17 +1,19 @@
 import { Entity } from "@/core/entities/entity";
 import { UniqueEntityID } from "@/core/entities/unique-entity-id";
+import { Injectable } from "@nestjs/common";
 
-interface AttachmentProps {
+export interface AttachmentProps {
   title: string;
-  link: string;
+  url: string;
 }
 
+@Injectable()
 export class Attachment extends Entity<AttachmentProps> {
   get title() {
     return this.props.title;
   }
 
-  get link() {
+  get url() {
     return this.props.title;
   }
 
