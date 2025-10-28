@@ -8,8 +8,11 @@ export class DomainEvents {
   private static handlersMap: Record<string, DomainEventCallback[]> = {};
   private static markedAggregates: AggregateRoot<unknown>[] = [];
 
+  public static shouldRun = true;
+
   public static markAggregateForDispatch(aggregate: AggregateRoot<unknown>) {
     const aggregateFound = !!this.findMarkedAggregateByID(aggregate.id);
+
     if (!aggregateFound) {
       this.markedAggregates.push(aggregate);
     }
@@ -25,6 +28,7 @@ export class DomainEvents {
     aggregate: AggregateRoot<unknown>
   ) {
     const index = this.markedAggregates.findIndex((a) => a.equals(aggregate));
+
     this.markedAggregates.splice(index, 1);
   }
 
@@ -36,6 +40,7 @@ export class DomainEvents {
 
   public static dispatchEventsForAggregate(id: UniqueEntityID) {
     const aggregate = this.findMarkedAggregateByID(id);
+
     if (aggregate) {
       this.dispatchAggregateEvents(aggregate);
       aggregate.clearEvents();
@@ -48,9 +53,11 @@ export class DomainEvents {
     eventClassName: string
   ) {
     const wasEventRegisteredBefore = eventClassName in this.handlersMap;
+
     if (!wasEventRegisteredBefore) {
       this.handlersMap[eventClassName] = [];
     }
+
     this.handlersMap[eventClassName].push(callback);
   }
 
@@ -64,9 +71,16 @@ export class DomainEvents {
 
   private static dispatch(event: DomainEvent) {
     const eventClassName: string = event.constructor.name;
+
     const isEventRegistered = eventClassName in this.handlersMap;
+
+    if (!this.shouldRun) {
+      return;
+    }
+
     if (isEventRegistered) {
       const handlers = this.handlersMap[eventClassName];
+
       for (const handler of handlers) {
         handler(event);
       }

@@ -19,9 +19,10 @@ model User {
   password String
   role     UserRole @default(STUDENT)
 
-  questions Question[]
-  answers   Answer[]
-  Comment   Comment[]
+  questions    Question[]
+  answers      Answer[]
+  Comment      Comment[]
+  Notification Notification[]
 
   @@map("users")
 }
@@ -35,11 +36,12 @@ model Question {
   authorId     String  @map("author_id")
   bestAnswerId String? @unique @map("best_answer_id")
 
-  author      User         @relation(fields: [authorId], references: [id])
-  bestAnswer  Answer?      @relation("bestAnswer", fields: [bestAnswerId], references: [id])
-  answers     Answer[]
-  comments    Comment[]
-  attachments Attachment[]
+  author        User           @relation(fields: [authorId], references: [id])
+  bestAnswer    Answer?        @relation("bestAnswer", fields: [bestAnswerId], references: [id])
+  answers       Answer[]
+  comments      Comment[]
+  attachments   Attachment[]
+  notifications Notification[]
 
   createdAt DateTime  @default(now()) @map("created_at")
   updatedAt DateTime? @updatedAt @map("updated_at")
@@ -93,4 +95,19 @@ model Attachment {
   answer   Answer?   @relation(fields: [answerId], references: [id])
 
   @@map("attachments")
+}
+
+model Notification {
+  id          String    @id @default(uuid())
+  recipientId String    @map("recipient_id")
+  title       String
+  content     String
+  readAt      DateTime? @map("read_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
+
+  recipient  User      @relation(fields: [recipientId], references: [id])
+  Question   Question? @relation(fields: [questionId], references: [id])
+  questionId String?
+
+  @@map("notifications")
 }
